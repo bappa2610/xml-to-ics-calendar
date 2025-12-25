@@ -5,18 +5,28 @@ from datetime import datetime
 
 XML_URL = "https://zerodha.com/marketintel/holiday-calendar/?format=xml"
 
-xml_data = requests.get(XML_URL).text
-root = ET.fromstring(xml_data)
+response = requests.get(XML_URL)
+response.raise_for_status()
 
-cal = Calendar()
+root = ET.fromstring(response.content)
+calendar = Calendar()
 
-for item in root.findall(".//holiday"):
-    e = Event()
-    e.name = item.find("title").text
-    e.begin = datetime.strptime(item.find("date").text, "%Y-%m-%d")
-    cal.events.add(e)
+# Zerodha XML structure
+for holiday in root.findall(".//holiday"):
+    name = holiday.findtext("description")
+    date = holiday.findtext("date")
 
-with open("calendar.ics", "w") as f:
-    f.writelines(cal)
+    if not name or not date:
+        continue
 
-print("ICS generated")
+    event = Event()
+    event.name = name
+    event.begin = datetime.strptime(date, "%Y-%m-%d")
+    event.make_all_day()
+
+    calendar.events.add(event)
+
+with open("calendar.ics", "w", encoding="utf-8") as f:
+    f.writelines(calendar)
+
+print("Zerodha holiday calendar updated successfully")
