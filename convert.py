@@ -3,7 +3,7 @@ import xml.etree.ElementTree as ET
 from ics import Calendar, Event
 from datetime import datetime
 
-XML_URL = "https://zerodha.com/marketintel/bulletin/?format=xml"
+XML_URL = "https://zerodha.com/marketintel/holiday-calendar/?format=xml"
 
 xml_data = requests.get(XML_URL).text
 root = ET.fromstring(xml_data)
